@@ -89,8 +89,26 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String currentUserUid=fAuth.getCurrentUser().getUid();
-                msgDbRef.child("deneme"+position).setValue(subjectLists.get(position));
-                startActivity(new Intent(HomeActivity.this,ChatActivity.class));
+                String receiverEmail=subjectLists.get(position);
+                Intent intent=new Intent(HomeActivity.this,ChatActivity.class);
+                dbRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+                            if (dataSnapshot.getValue().equals(receiverEmail)){
+                                String receiverUid=dataSnapshot.getKey();
+                                intent.putExtra("RECEIVER_UID",receiverUid);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                intent.putExtra("RECEIVER_EMAIL",receiverEmail);
+                startActivity(intent);
             }
         });
 
