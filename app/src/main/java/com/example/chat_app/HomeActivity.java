@@ -33,6 +33,7 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseDatabase db;
     private DatabaseReference dbRef,msgDbRef;
     private ArrayAdapter<String> adapter;
+    String receiverUid;
 
     @Override
     public void onBackPressed() {
@@ -85,9 +86,11 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 String currentUserUid=fAuth.getCurrentUser().getUid();
                 String receiverEmail=subjectLists.get(position);
                 Intent intent=new Intent(HomeActivity.this,ChatActivity.class);
@@ -96,11 +99,13 @@ public class HomeActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot dataSnapshot: snapshot.getChildren()){
                             if (dataSnapshot.getValue().equals(receiverEmail)){
-                                String receiverUid=dataSnapshot.getKey();
+                                receiverUid=dataSnapshot.getKey();
                                 intent.putExtra("RECEIVER_UID",receiverUid);
+                                startActivity(intent);
                             }
                         }
                     }
+
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
@@ -108,7 +113,8 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 });
                 intent.putExtra("RECEIVER_EMAIL",receiverEmail);
-                startActivity(intent);
+
+
             }
         });
 
