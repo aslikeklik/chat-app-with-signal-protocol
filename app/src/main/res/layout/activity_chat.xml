@@ -7,7 +7,7 @@
     tools:context=".ChatActivity">
 
     <ListView
-        android:id="@+id/listView"
+        android:id="@+id/messageListView"
         android:layout_width="match_parent"
         android:layout_height="500dp" />
 
