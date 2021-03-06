@@ -50,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
         databaseReference= FirebaseDatabase.getInstance().getReference("Users");
 
 
-
-
         mAuth = FirebaseAuth.getInstance();
         firebaseUser = mAuth.getCurrentUser(); // authenticate olan kullaniciyi aliyoruz eger var ise
         if(firebaseUser != null){
