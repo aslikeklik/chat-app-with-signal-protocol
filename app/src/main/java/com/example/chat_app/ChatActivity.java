@@ -60,8 +60,10 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 messageList.clear();
               for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-                    String message=dataSnapshot.getValue(String.class);
-                    messageList.add(message);
+                  String a=dataSnapshot.getKey();
+                  dataSnapshot.getValue(Message.class);
+                    Message message=dataSnapshot.getValue(Message.class);
+                    messageList.add(message.getMessage());
                   adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
                   adapter.notifyDataSetChanged();
                   listView.setAdapter(adapter);
@@ -78,14 +80,23 @@ public class ChatActivity extends AppCompatActivity {
         });
 
 
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sendMessageButton(View view) {
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
-        String message=messageEditText.getText().toString();
+        String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
+        String messageText=messageEditText.getText().toString();
         String sortedUid=sortUid(receiverUid,mAuth.getUid().toString());
         String timestamp=Long.toString(new Date().getTime()); //mesajın zamanı için
+
+        Message message=Message.builder()
+                .message(messageText)
+                .receiver(receiverEmail)
+                .sender(mAuth.getCurrentUser().getEmail())
+                .msgTimeStamp(timestamp)
+                .build();
         FirebaseDatabase.getInstance().getReference("Messages").child(sortedUid).child(timestamp).setValue(message);
 
     }
