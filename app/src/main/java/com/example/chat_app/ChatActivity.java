@@ -63,11 +63,10 @@ public class ChatActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent){
                 // Cast the current view as a TextView
                 TextView tv = (TextView) super.getView(position,convertView,parent);
+
                 if(userList.get(position).equals(receiverEmail))
                     tv.setGravity(Gravity.RIGHT);
                 else tv.setGravity(Gravity.LEFT);
-
-                // Return the view
                 return tv;
             }
         };
