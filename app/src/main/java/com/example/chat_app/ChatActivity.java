@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -58,6 +59,18 @@ public class ChatActivity extends AppCompatActivity {
         String sortUid=sortUid(receiverUid,senderUid);
         String currentUser= mAuth.getCurrentUser().getEmail();
 
+        adapter  = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,messageList){
+            public View getView(int position, View convertView, ViewGroup parent){
+                // Cast the current view as a TextView
+                TextView tv = (TextView) super.getView(position,convertView,parent);
+                if(userList.get(position).equals(receiverEmail))
+                    tv.setGravity(Gravity.RIGHT);
+                else tv.setGravity(Gravity.LEFT);
+
+                // Return the view
+                return tv;
+            }
+        };
 
 
         FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).addValueEventListener(new ValueEventListener() {
@@ -65,17 +78,17 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 messageList.clear();
+                userList.clear();
               for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-                  String a=dataSnapshot.getKey();
-                  dataSnapshot.getValue(Message.class);
                     Message message=dataSnapshot.getValue(Message.class);
                     messageList.add(message.getMessage());
-                    userList.add(message.getSender());
                     Log.i("user list",userList.toString());
                   //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
-                  adapter.notifyDataSetChanged();
+             //     adapter.notifyDataSetChanged();
                   listView.setAdapter(adapter);
-                }
+                  userList.add(message.getReceiver());
+
+              }
 
 
 
@@ -106,42 +119,6 @@ public class ChatActivity extends AppCompatActivity {
                 .msgTimeStamp(timestamp)
                 .build();
         FirebaseDatabase.getInstance().getReference("Messages").child(sortedUid).child(timestamp).setValue(message);
-
-        String currentUser= mAuth.getCurrentUser().getEmail();
-        adapter  = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,messageList){
-            public View getView(int position, View convertView, ViewGroup parent){
-                // Cast the current view as a TextView
-                TextView tv = (TextView) super.getView(position,convertView,parent);
-
-                /*
-                    setGravity
-                        void setGravity (int gravity)
-
-                        Sets the horizontal alignment of the text and the vertical gravity that
-                        will be used when there is extra space in the TextView beyond what
-                        is required for the text itself.
-                */
-                /*
-                    Gravity
-                        END
-                            Push object to x-axis position at the end of its container, not changing its size.
-
-                        RIGHT
-                            Push object to the right of its container, not changing its size.
-
-                        CENTER_VERTICAL
-                            Place object in the vertical center of its container, not changing its size.
-                */
-                // Set the item text gravity to right/end and vertical center
-                if(userList.get(position).equals(currentUser))
-                    tv.setGravity(Gravity.RIGHT);
-                else tv.setGravity(Gravity.LEFT);
-
-                // Return the view
-                return tv;
-            }
-        };
-
 
     }
     @RequiresApi(api = Build.VERSION_CODES.N)
