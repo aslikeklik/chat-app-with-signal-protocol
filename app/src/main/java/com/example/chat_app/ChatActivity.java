@@ -8,10 +8,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,6 +36,7 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseUser firebaseUser;
     private ListView listView;
     private ArrayList<String> messageList=new ArrayList<>();
+    private ArrayList<String> userList=new ArrayList<>();
     private ArrayAdapter<String> adapter;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -53,6 +57,41 @@ public class ChatActivity extends AppCompatActivity {
         String senderUid=mAuth.getUid().toString();
         String sortUid=sortUid(receiverUid,senderUid);
 
+        adapter  = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,messageList){
+            public View getView(int position, View convertView, ViewGroup parent){
+                // Cast the current view as a TextView
+                TextView tv = (TextView) super.getView(position,convertView,parent);
+
+                /*
+                    setGravity
+                        void setGravity (int gravity)
+
+                        Sets the horizontal alignment of the text and the vertical gravity that
+                        will be used when there is extra space in the TextView beyond what
+                        is required for the text itself.
+                */
+                /*
+                    Gravity
+                        END
+                            Push object to x-axis position at the end of its container, not changing its size.
+
+                        RIGHT
+                            Push object to the right of its container, not changing its size.
+
+                        CENTER_VERTICAL
+                            Place object in the vertical center of its container, not changing its size.
+                */
+                // Set the item text gravity to right/end and vertical center
+               String currentUser= mAuth.getCurrentUser().getEmail();
+                if(userList.get(position).equals(currentUser))
+                    tv.setGravity(Gravity.RIGHT);
+                else tv.setGravity(Gravity.LEFT);
+
+                // Return the view
+                return tv;
+            }
+        };
+
 
         FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).addValueEventListener(new ValueEventListener() {
 
@@ -64,7 +103,8 @@ public class ChatActivity extends AppCompatActivity {
                   dataSnapshot.getValue(Message.class);
                     Message message=dataSnapshot.getValue(Message.class);
                     messageList.add(message.getMessage());
-                  adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
+                    userList.add(message.getSender());
+                  //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
                   adapter.notifyDataSetChanged();
                   listView.setAdapter(adapter);
                 }
