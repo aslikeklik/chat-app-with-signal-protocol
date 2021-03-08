@@ -26,8 +26,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -39,6 +48,9 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<String> messageList=new ArrayList<>();
     private ArrayList<String> userList=new ArrayList<>();
     private ArrayAdapter<String> adapter;
+    private byte encryptionKey[] = {9, 115, 51, 86, 105, 4, -31, -23, -68, 88, 17, 20, 3, -105, 119, -53};
+    private Cipher cipher, decipher;
+    private SecretKeySpec secretKeySpec;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -59,6 +71,18 @@ public class ChatActivity extends AppCompatActivity {
         String sortUid=sortUid(receiverUid,senderUid);
         String currentUser= mAuth.getCurrentUser().getEmail();
 
+        try {
+            cipher = Cipher.getInstance("AES");
+            decipher = Cipher.getInstance("AES");
+            secretKeySpec = new SecretKeySpec(encryptionKey, "AES");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+
+
+
         adapter  = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,messageList){
             public View getView(int position, View convertView, ViewGroup parent){
                 // Cast the current view as a TextView
@@ -67,6 +91,7 @@ public class ChatActivity extends AppCompatActivity {
                 if(userList.get(position).equals(receiverEmail))
                     tv.setGravity(Gravity.RIGHT);
                 else tv.setGravity(Gravity.LEFT);
+
                 return tv;
             }
         };
@@ -80,15 +105,18 @@ public class ChatActivity extends AppCompatActivity {
                 userList.clear();
               for(DataSnapshot dataSnapshot: snapshot.getChildren()){
                     Message message=dataSnapshot.getValue(Message.class);
-                    messageList.add(message.getMessage());
-                    Log.i("user list",userList.toString());
+                  try {
+                      messageList.add(AESDecryptionMethod(message.getMessage()));
+                  } catch (UnsupportedEncodingException e) {
+                      e.printStackTrace();
+                  }
+                  Log.i("user list",userList.toString());
                   //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
              //     adapter.notifyDataSetChanged();
                   listView.setAdapter(adapter);
                   userList.add(message.getReceiver());
 
               }
-
 
 
             }
@@ -107,7 +135,7 @@ public class ChatActivity extends AppCompatActivity {
     public void sendMessageButton(View view) {
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
         String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
-        String messageText=messageEditText.getText().toString();
+        String messageText=AESEncryptionMethod(messageEditText.getText().toString());
         String sortedUid=sortUid(receiverUid,mAuth.getUid().toString());
         String timestamp=Long.toString(new Date().getTime()); //mesajın zamanı için
 
@@ -128,6 +156,52 @@ public class ChatActivity extends AppCompatActivity {
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
         return sorted;
+    }
+
+    private String AESEncryptionMethod(String string){
+
+        byte[] stringByte = string.getBytes();
+        byte[] encryptedByte = new byte[stringByte.length];
+
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);//secret key spec is an array contains keys
+            encryptedByte = cipher.doFinal(stringByte);
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+
+        String returnString = null;
+
+        try {
+            returnString = new String(encryptedByte, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return returnString;
+    }
+
+    private String AESDecryptionMethod(String string) throws UnsupportedEncodingException {
+        byte[] EncryptedByte = string.getBytes("ISO-8859-1");
+        String decryptedString = string;
+
+        byte[] decryption;
+
+        try {
+            decipher.init(cipher.DECRYPT_MODE, secretKeySpec);
+            decryption = decipher.doFinal(EncryptedByte);
+            decryptedString = new String(decryption);
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+        return decryptedString;
     }
 
 }
