@@ -5,6 +5,9 @@ import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,11 +15,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,6 +56,14 @@ public class MainActivity extends AppCompatActivity {
         buttonRegister = findViewById(R.id.buttonRegister);
         databaseReference= FirebaseDatabase.getInstance().getReference("Users");
 
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
+        //I added this if statement to keep the selected fragment when rotating the device
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new GirisFragment()).commit();
+        }
+
 
         mAuth = FirebaseAuth.getInstance();
         firebaseUser = mAuth.getCurrentUser(); // authenticate olan kullaniciyi aliyoruz eger var ise
@@ -80,8 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     public void createUser(String username,String password){
-                mAuth.createUserWithEmailAndPassword(username, password)
+        mAuth.createUserWithEmailAndPassword(username, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -91,8 +107,12 @@ public class MainActivity extends AppCompatActivity {
                             //   FirebaseUser user = mAuth.getCurrentUser();
                             String email=mAuth.getCurrentUser().getEmail();
                             String uid=mAuth.getCurrentUser().getUid();
+                            User user=User.builder()
+                                    .email(email)
+                                    .UID(uid)
+                                    .build();
                             databaseReference= FirebaseDatabase.getInstance().getReference("Users");
-                            databaseReference.child(uid).setValue(email);
+                            databaseReference.child(uid).setValue(user);
 
                             startActivity(new Intent(MainActivity.this,HomeActivity.class));
 
@@ -133,5 +153,24 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Fragment selectedFragment = null;
+                    switch (item.getItemId()) {
+                        case R.id.nav_giris:
+                            selectedFragment = new GirisFragment();
+                            break;
+                        case R.id.nav_kaydol:
+                            selectedFragment = new KaydolFragment();
+                            break;
+                    }
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                            selectedFragment).commit();
+                    return true;
+                }
+            };
 }
+
+
+

@@ -103,20 +103,20 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 messageList.clear();
                 userList.clear();
-              for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+                for(DataSnapshot dataSnapshot: snapshot.getChildren()){
                     Message message=dataSnapshot.getValue(Message.class);
-                  try {
-                      messageList.add(AESDecryptionMethod(message.getMessage()));
-                  } catch (UnsupportedEncodingException e) {
-                      e.printStackTrace();
-                  }
-                  Log.i("user list",userList.toString());
-                  //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
-             //     adapter.notifyDataSetChanged();
-                  listView.setAdapter(adapter);
-                  userList.add(message.getReceiver());
+                    try {
+                        messageList.add(AESDecryptionMethod(message.getMessage()));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    Log.i("user list",userList.toString());
+                    //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
+                    //     adapter.notifyDataSetChanged();
+                    listView.setAdapter(adapter);
+                    userList.add(message.getReceiver());
 
-              }
+                }
 
 
             }

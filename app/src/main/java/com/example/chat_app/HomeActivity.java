@@ -57,13 +57,14 @@ public class HomeActivity extends AppCompatActivity {
         dbRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String value=snapshot.getValue(String.class).toString();
+                User user=snapshot.getValue(User.class);
+                String value=user.getEmail();
                 if(!value.equals(fAuth.getCurrentUser().getEmail().toString())) {
                     subjectLists.add(value);
                     adapter.notifyDataSetChanged();
 
                 }
-                }
+            }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -94,18 +95,34 @@ public class HomeActivity extends AppCompatActivity {
                 String currentUserUid=fAuth.getCurrentUser().getUid();
                 String receiverEmail=subjectLists.get(position);
                 Intent intent=new Intent(HomeActivity.this,ChatActivity.class);
-                dbRef.addValueEventListener(new ValueEventListener() {
+
+                dbRef.addChildEventListener(new ChildEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    public void onChildAdded(@NonNull DataSnapshot snapshot,@Nullable String previousChildName) {
                         for(DataSnapshot dataSnapshot: snapshot.getChildren()){
                             if (dataSnapshot.getValue().equals(receiverEmail)){
-                                receiverUid=dataSnapshot.getKey();
+                                receiverUid=snapshot.getKey();
                                 intent.putExtra("RECEIVER_UID",receiverUid);
                                 startActivity(intent);
                             }
                         }
+
                     }
 
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot snapshot,@Nullable String previousChildName) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot snapshot,@Nullable String previousChildName) {
+
+                    }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
@@ -120,5 +137,24 @@ public class HomeActivity extends AppCompatActivity {
 
 
     }
+
+     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.exit:
+                fAuth.signOut();
+                startActivity(new Intent(this,MainActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
 }
