@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText editTextUserName;
     private EditText editTextUserPassword;
-    private Button buttonLogin,buttonRegister;
+    private Button buttonLogin, buttonRegister;
     private TextView txtRegister;
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
@@ -50,13 +50,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editTextUserName = (EditText)findViewById(R.id.editTextUserName);
-        editTextUserPassword = (EditText)findViewById(R.id.editTextUserPassword);
-        buttonLogin = (Button) findViewById(R.id.buttonLogin);
-        buttonRegister = findViewById(R.id.buttonRegister);
-        databaseReference= FirebaseDatabase.getInstance().getReference("Users");
+        editTextUserName=(EditText) findViewById(R.id.editTextUserName);
+        editTextUserPassword=(EditText) findViewById(R.id.editTextUserPassword);
+        buttonLogin=(Button) findViewById(R.id.btnLogin);
+        buttonRegister=(Button) findViewById(R.id.btnRegister);
+        databaseReference=FirebaseDatabase.getInstance().getReference("Users");
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNav=findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         //I added this if statement to keep the selected fragment when rotating the device
         if (savedInstanceState == null) {
@@ -65,45 +65,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        mAuth = FirebaseAuth.getInstance();
-        firebaseUser = mAuth.getCurrentUser(); // authenticate olan kullaniciyi aliyoruz eger var ise
-        if(firebaseUser != null){
+        mAuth=FirebaseAuth.getInstance();
+        firebaseUser=mAuth.getCurrentUser(); // authenticate olan kullaniciyi aliyoruz eger var ise
+        if (firebaseUser != null) {
 
         }
-
-
-
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userName=editTextUserName.getText().toString();
-                String password=editTextUserPassword.getText().toString();
-                signUser(userName,password);
-            }
-        });
-
-        buttonRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userName=editTextUserName.getText().toString();
-                String password=editTextUserPassword.getText().toString();
-                createUser(userName,password);
-
-            }
-        });
 
 
     }
 
 
-    public void createUser(String username,String password){
-        mAuth.createUserWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+    public void createUser(String username,String password) {
+        mAuth.createUserWithEmailAndPassword(username,password)
+                .addOnCompleteListener(this,new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d("TAG", "createUserWithEmail:success");
+                            Log.d("TAG","createUserWithEmail:success");
                             //   FirebaseUser user = mAuth.getCurrentUser();
                             String email=mAuth.getCurrentUser().getEmail();
                             String uid=mAuth.getCurrentUser().getUid();
@@ -111,15 +90,15 @@ public class MainActivity extends AppCompatActivity {
                                     .email(email)
                                     .UID(uid)
                                     .build();
-                            databaseReference= FirebaseDatabase.getInstance().getReference("Users");
+                            databaseReference=FirebaseDatabase.getInstance().getReference("Users");
                             databaseReference.child(uid).setValue(user);
 
                             startActivity(new Intent(MainActivity.this,HomeActivity.class));
 
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w("TAG", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                            Log.w("TAG","createUserWithEmail:failure",task.getException());
+                            Toast.makeText(MainActivity.this,"Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 
                         }
@@ -129,21 +108,21 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    public void signUser(String username,String password){
-        mAuth.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+    public void signUser(String username,String password) {
+        mAuth.signInWithEmailAndPassword(username,password)
+                .addOnCompleteListener(this,new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d("TAG", "signUserWithEmail:success");
+                            Log.d("TAG","signUserWithEmail:success");
                             //   FirebaseUser user = mAuth.getCurrentUser();
 
                             startActivity(new Intent(MainActivity.this,HomeActivity.class));
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w("TAG", "signUserWithEmail:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                            Log.w("TAG","signUserWithEmail:failure",task.getException());
+                            Toast.makeText(MainActivity.this,"Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 
                         }
@@ -153,23 +132,41 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener navListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
-                    switch (item.getItemId()) {
-                        case R.id.nav_giris:
-                            selectedFragment = new GirisFragment();
-                            break;
-                        case R.id.nav_kaydol:
-                            selectedFragment = new KaydolFragment();
-                            break;
-                    }
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                            selectedFragment).commit();
-                    return true;
-                }
-            };
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener=new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Fragment selectedFragment=null;
+            switch (item.getItemId()) {
+                case R.id.nav_giris:
+                    selectedFragment=new GirisFragment();
+                    break;
+                case R.id.nav_kaydol:
+                    selectedFragment=new KaydolFragment();
+                    break;
+            }
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    selectedFragment).commit();
+            return true;
+        }
+    };
+
+    public void login(View view) {
+        editTextUserName=findViewById(R.id.editTextUserName);
+        editTextUserPassword=findViewById(R.id.editTextUserPassword);
+
+        String userName=editTextUserName.getText().toString();
+        String password=editTextUserPassword.getText().toString();
+        signUser(userName,password);
+    }
+
+    public void signup(View view) {
+        editTextUserName=findViewById(R.id.editTextUserName);
+        editTextUserPassword=findViewById(R.id.editTextUserPassword);
+
+        String userName=editTextUserName.getText().toString();
+        String password=editTextUserPassword.getText().toString();
+        createUser(userName,password);
+    }
 }
 
 

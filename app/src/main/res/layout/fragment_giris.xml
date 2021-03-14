@@ -43,12 +43,13 @@
                 android:textAllCaps="false"
                 android:layout_marginRight="20dp"
                 android:layout_marginLeft="20dp"
-                android:id="@+id/buttonLogin"
+                android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_gravity="center"
                 android:background="#C8084FF5"
                 android:textColor="#FFFFFF"
                 android:layout_height="wrap_content"
+                android:onClick="login"
                 android:text="Giriş" />
 
         </LinearLayout>
