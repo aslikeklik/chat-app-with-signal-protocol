@@ -32,6 +32,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Date;
 
+import es.dmoral.toasty.Toasty;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText editTextUserName;
@@ -49,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
 
         editTextUserName=(EditText) findViewById(R.id.editTextUserName);
         editTextUserPassword=(EditText) findViewById(R.id.editTextUserPassword);
@@ -98,8 +103,13 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG","createUserWithEmail:failure",task.getException());
+
                             Toast.makeText(MainActivity.this,"Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+
+
+                            Toasty.error(getApplicationContext(), "This is an error toast.", Toast.LENGTH_SHORT, true).show();
+
 
                         }
 
@@ -122,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG","signUserWithEmail:failure",task.getException());
-                            Toast.makeText(MainActivity.this,"Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toasty.error(getApplicationContext(), "This is an error toast.", Toast.LENGTH_SHORT, true).show();
+
 
                         }
 

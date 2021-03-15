@@ -48,7 +48,9 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<String> messageList=new ArrayList<>();
     private ArrayList<String> userList=new ArrayList<>();
     private ArrayAdapter<String> adapter;
+
     private byte encryptionKey[] = {9, 115, 51, 86, 105, 4, -31, -23, -68, 88, 17, 20, 3, -105, 119, -53};
+
     private Cipher cipher, decipher;
     private SecretKeySpec secretKeySpec;
 
