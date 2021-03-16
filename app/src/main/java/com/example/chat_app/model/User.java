@@ -1,4 +1,4 @@
-package com.example.chat_app;
+package com.example.chat_app.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -18,4 +18,7 @@ import lombok.experimental.FieldDefaults;
 public class User {
     String email;
     String UID;
+    String name;
+    String surname;
+    String publicKey;
 }

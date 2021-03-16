@@ -1,10 +1,11 @@
 package com.example.chat_app;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,9 +17,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.chat_app.model.Message;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -65,13 +66,17 @@ public class ChatActivity extends AppCompatActivity {
         mAuth=FirebaseAuth.getInstance();
         listView=findViewById(R.id.messageListView);
 
+        String senderEmail=mAuth.getCurrentUser().getEmail();
+        String senderUid=mAuth.getCurrentUser().getUid();
+        SharedPreferences sharedPref = this.getSharedPreferences("sharedPref",Context.MODE_PRIVATE);
+        // String privateKey= sharedPref.getString("123@123.com","yok falan");
 
 
         String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
-        String senderUid=mAuth.getUid().toString();
+
         String sortUid=sortUid(receiverUid,senderUid);
-        String currentUser= mAuth.getCurrentUser().getEmail();
+
 
         try {
             cipher = Cipher.getInstance("AES");

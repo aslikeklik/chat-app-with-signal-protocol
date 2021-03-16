@@ -1,4 +1,4 @@
-package com.example.chat_app;
+package com.example.chat_app.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 

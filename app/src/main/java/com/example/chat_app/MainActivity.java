@@ -1,6 +1,9 @@
 package com.example.chat_app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -12,11 +15,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.chat_app.fragments.GirisFragment;
 import com.example.chat_app.fragments.KaydolFragment;
+import com.example.chat_app.model.User;
+import com.example.chat_app.rsa.RSAKeyPairGenerator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -26,12 +32,18 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
 import es.dmoral.toasty.Toasty;
+import lombok.SneakyThrows;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText editTextUserName;
     private EditText editTextUserPassword;
+    private EditText editTextName;
+    private EditText editTextSurname;
     private Button buttonLogin, buttonRegister;
     private TextView txtRegister;
     private FirebaseAuth mAuth;
@@ -51,9 +63,13 @@ public class MainActivity extends AppCompatActivity {
 
         editTextUserName=(EditText) findViewById(R.id.editTextUserName);
         editTextUserPassword=(EditText) findViewById(R.id.editTextUserPassword);
+        editTextName=findViewById(R.id.editTextName);
+        editTextSurname=findViewById(R.id.editTextSurname);
         buttonLogin=(Button) findViewById(R.id.btnLogin);
         buttonRegister=(Button) findViewById(R.id.btnRegister);
         databaseReference=FirebaseDatabase.getInstance().getReference("Users");
+
+
 
         BottomNavigationView bottomNav=findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
@@ -75,8 +91,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void createUser(String username,String password) {
+        editTextName=findViewById(R.id.editTextName);
+        editTextSurname=findViewById(R.id.editTextSurname);
+
         mAuth.createUserWithEmailAndPassword(username,password)
                 .addOnCompleteListener(this,new OnCompleteListener<AuthResult>() {
+                    @SneakyThrows
+                    @RequiresApi(api=Build.VERSION_CODES.O)
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
@@ -85,10 +106,18 @@ public class MainActivity extends AppCompatActivity {
                             //   FirebaseUser user = mAuth.getCurrentUser();
                             String email=mAuth.getCurrentUser().getEmail();
                             String uid=mAuth.getCurrentUser().getUid();
+                            String name=editTextName.getText().toString();
+                            String surname=editTextSurname.getText().toString();
+                            RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
+
                             User user=User.builder()
                                     .email(email)
                                     .UID(uid)
+                                    .name(name)
+                                    .surname(surname)
+                                    .publicKey(Base64.getEncoder().encodeToString(keyPairGenerator.getPublicKey().getEncoded()))
                                     .build();
+
                             databaseReference=FirebaseDatabase.getInstance().getReference("Users");
                             databaseReference.child(uid).setValue(user);
 
@@ -163,13 +192,28 @@ public class MainActivity extends AppCompatActivity {
         signUser(userName,password);
     }
 
-    public void signup(View view) {
+    @RequiresApi(api=Build.VERSION_CODES.O)
+    public void signup(View view) throws NoSuchAlgorithmException {
         editTextUserName=findViewById(R.id.editTextUserName);
         editTextUserPassword=findViewById(R.id.editTextUserPassword);
 
         String userName=editTextUserName.getText().toString();
         String password=editTextUserPassword.getText().toString();
+        RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
+        String privateKey=Base64.getEncoder().encodeToString(keyPairGenerator.getPrivateKey().getEncoded());
+
+
+        SharedPreferences sharedPref = this.getSharedPreferences("sharedPref",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        String uid=mAuth.getCurrentUser().getUid();
+        editor.putString(userName,privateKey);
+        editor.commit();
+        String privateKeyy= sharedPref.getString(userName,"yok falan");
+
         createUser(userName,password);
+
+
+
     }
 }
 

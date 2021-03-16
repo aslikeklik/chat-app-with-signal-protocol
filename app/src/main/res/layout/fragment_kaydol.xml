@@ -25,6 +25,22 @@
                 app:srcCompat="@drawable/chaticon" />
 
             <EditText
+                android:id="@+id/editTextName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:hint="İsim"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/editTextSurname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:hint="Soyisim"
+                android:inputType="text" />
+
+            <EditText
                 android:id="@+id/editTextUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
