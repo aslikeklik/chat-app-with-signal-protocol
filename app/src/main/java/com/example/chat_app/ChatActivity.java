@@ -1,6 +1,7 @@
 package com.example.chat_app;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import com.example.chat_app.model.Message;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 
 import javax.crypto.BadPaddingException;
@@ -38,6 +41,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+
+import static com.example.chat_app.rsa.RSAUtils.encrypt;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -49,8 +54,8 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<String> messageList=new ArrayList<>();
     private ArrayList<String> userList=new ArrayList<>();
     private ArrayAdapter<String> adapter;
+    private static String receiverPrivateKey,receiverPublicKey,senderPrivateKey;
 
-    private byte encryptionKey[] = {9, 115, 51, 86, 105, 4, -31, -23, -68, 88, 17, 20, 3, -105, 119, -53};
 
     private Cipher cipher, decipher;
     private SecretKeySpec secretKeySpec;
@@ -72,21 +77,32 @@ public class ChatActivity extends AppCompatActivity {
         // String privateKey= sharedPref.getString("123@123.com","yok falan");
 
 
+
         String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
 
-        String sortUid=sortUid(receiverUid,senderUid);
+        //KEY DEFINING
+        receiverPrivateKey=sharedPref.getString(receiverEmail,"");
+        senderPrivateKey=sharedPref.getString(senderEmail,"");
 
 
-        try {
-            cipher = Cipher.getInstance("AES");
-            decipher = Cipher.getInstance("AES");
-            secretKeySpec = new SecretKeySpec(encryptionKey, "AES");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        }
+
+        FirebaseDatabase.getInstance().getReference("Users").child(receiverUid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                receiverPublicKey=snapshot.child("publicKey").getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+            String sortUid=sortUid(receiverUid,senderUid);
+
+
 
 
 
@@ -111,12 +127,9 @@ public class ChatActivity extends AppCompatActivity {
                 messageList.clear();
                 userList.clear();
                 for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+
                     Message message=dataSnapshot.getValue(Message.class);
-                    try {
-                        messageList.add(AESDecryptionMethod(message.getMessage()));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
+                    messageList.add(message.getMessage());
                     Log.i("user list",userList.toString());
                     //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
                     //     adapter.notifyDataSetChanged();
@@ -138,16 +151,19 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sendMessageButton(View view) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void sendMessageButton(View view) throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException {
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
         String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
-        String messageText=AESEncryptionMethod(messageEditText.getText().toString());
+
         String sortedUid=sortUid(receiverUid,mAuth.getUid().toString());
         String timestamp=Long.toString(new Date().getTime()); //mesajın zamanı için
 
+        String messageText=messageEditText.getText().toString();
+        String cipherMessage = Base64.getEncoder().encodeToString(encrypt(messageText, receiverPublicKey));
+
         Message message=Message.builder()
-                .message(messageText)
+                .message(cipherMessage)
                 .receiver(receiverEmail)
                 .sender(mAuth.getCurrentUser().getEmail())
                 .msgTimeStamp(timestamp)
@@ -165,50 +181,6 @@ public class ChatActivity extends AppCompatActivity {
         return sorted;
     }
 
-    private String AESEncryptionMethod(String string){
 
-        byte[] stringByte = string.getBytes();
-        byte[] encryptedByte = new byte[stringByte.length];
-
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);//secret key spec is an array contains keys
-            encryptedByte = cipher.doFinal(stringByte);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        }
-
-        String returnString = null;
-
-        try {
-            returnString = new String(encryptedByte, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return returnString;
-    }
-
-    private String AESDecryptionMethod(String string) throws UnsupportedEncodingException {
-        byte[] EncryptedByte = string.getBytes("ISO-8859-1");
-        String decryptedString = string;
-
-        byte[] decryption;
-
-        try {
-            decipher.init(cipher.DECRYPT_MODE, secretKeySpec);
-            decryption = decipher.doFinal(EncryptedByte);
-            decryptedString = new String(decryption);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        }
-        return decryptedString;
-    }
 
 }
