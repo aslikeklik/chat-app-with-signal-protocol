@@ -42,6 +42,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
+import lombok.SneakyThrows;
+
+import static com.example.chat_app.rsa.RSAUtils.decrypt;
 import static com.example.chat_app.rsa.RSAUtils.encrypt;
 
 public class ChatActivity extends AppCompatActivity {
@@ -62,7 +65,7 @@ public class ChatActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
@@ -122,6 +125,8 @@ public class ChatActivity extends AppCompatActivity {
 
         FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).addValueEventListener(new ValueEventListener() {
 
+            @SneakyThrows
+            @RequiresApi(api=Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 messageList.clear();
@@ -129,7 +134,15 @@ public class ChatActivity extends AppCompatActivity {
                 for(DataSnapshot dataSnapshot: snapshot.getChildren()){
 
                     Message message=dataSnapshot.getValue(Message.class);
-                    messageList.add(message.getMessage());
+                    String plainText=message.getMessage(); //Şifreli şu anda decryption etmemiz gerek.
+                    if(message.getReceiver().equals(mAuth.getCurrentUser().getEmail())){
+                        plainText=decrypt(plainText,senderPrivateKey);
+                    }
+                    else {
+                        plainText=decrypt(plainText,receiverPrivateKey);
+                    }
+
+                    messageList.add(plainText);
                     Log.i("user list",userList.toString());
                     //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
                     //     adapter.notifyDataSetChanged();

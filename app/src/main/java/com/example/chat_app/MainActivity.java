@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private String userName;
     private String userPassword;
     private DatabaseReference databaseReference;
+    private static String publicKey,privateKey;
 
 
     @Override
@@ -108,14 +109,13 @@ public class MainActivity extends AppCompatActivity {
                             String uid=mAuth.getCurrentUser().getUid();
                             String name=editTextName.getText().toString();
                             String surname=editTextSurname.getText().toString();
-                            RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
 
                             User user=User.builder()
                                     .email(email)
                                     .UID(uid)
                                     .name(name)
                                     .surname(surname)
-                                    .publicKey(Base64.getEncoder().encodeToString(keyPairGenerator.getPublicKey().getEncoded()))
+                                    .publicKey(publicKey)
                                     .build();
 
                             databaseReference=FirebaseDatabase.getInstance().getReference("Users");
@@ -199,18 +199,22 @@ public class MainActivity extends AppCompatActivity {
 
         String userName=editTextUserName.getText().toString();
         String password=editTextUserPassword.getText().toString();
+        /*
         RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
         String privateKey=Base64.getEncoder().encodeToString(keyPairGenerator.getPrivateKey().getEncoded());
 
+         */
 
+        RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
+        publicKey=Base64.getEncoder().encodeToString(keyPairGenerator.getPublicKey().getEncoded());
+        privateKey=Base64.getEncoder().encodeToString(keyPairGenerator.getPrivateKey().getEncoded());
         SharedPreferences sharedPref = this.getSharedPreferences("sharedPref",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        String uid=mAuth.getCurrentUser().getUid();
         editor.putString(userName,privateKey);
         editor.commit();
-        String privateKeyy= sharedPref.getString(userName,"yok falan");
-
         createUser(userName,password);
+
+
 
 
 
