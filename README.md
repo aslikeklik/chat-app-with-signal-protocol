@@ -16,7 +16,10 @@ RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
 ```
 ## Key Storage
 The application keeps all public keys in database,
-<img  align="left" src="https://github.com/zahitkaya/chat-app/blob/master/images/publicKeys.PNG"  width="50%" height="50%"/> 
+
+<p align="left">
+<img   src="https://github.com/zahitkaya/chat-app/blob/master/images/publicKeys.PNG"  width="50%" height="50%"/> 
+</p>
 
 And it keeps private keys in storage using shared preference. 
 ```
@@ -30,9 +33,9 @@ The application keeps messages in an encrypted form in the database.
 String cipherMessage = Base64.getEncoder().encodeToString(encrypt(messageText, receiverPublicKey));
 ```
 While encrypting the messages, it makes RSA encryption with the receiver's public key.
-
-<img  align="left" src="https://github.com/zahitkaya/chat-app/blob/master/images/encryptedMessages.PNG" width="50%" height="50%" >
-
+<p align="left">
+<img  src="https://github.com/zahitkaya/chat-app/blob/master/images/encryptedMessages.PNG" width="50%" height="50%" >
+</p>
 
 ## Decryption
 After the application pulls ciphertext in the database, it decrypts it in the client and messages appear on the user interface.
