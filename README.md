@@ -52,4 +52,9 @@ After the application pulls ciphertext in the database, it decrypts it in the cl
 <img src="https://github.com/zahitkaya/chat-app/blob/master/images/Screenshot_1616186234.png" width="25%" height="25%" >
 </p>
 
-
+## Used Technologies
+* Firebase Database 19.6
+* Firebase Auth 20.0.3
+* Toasty 1.5.0
+* Lombok 1.18.16
+* Java Cryptography Architecture
