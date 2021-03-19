@@ -143,7 +143,6 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     messageList.add(plainText);
-                    Log.i("user list",userList.toString());
                     //adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
                     //     adapter.notifyDataSetChanged();
                     listView.setAdapter(adapter);
