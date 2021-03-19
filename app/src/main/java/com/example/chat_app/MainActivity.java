@@ -83,9 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth=FirebaseAuth.getInstance();
         firebaseUser=mAuth.getCurrentUser(); // authenticate olan kullaniciyi aliyoruz eger var ise
-        if (firebaseUser != null) {
 
-        }
 
 
     }

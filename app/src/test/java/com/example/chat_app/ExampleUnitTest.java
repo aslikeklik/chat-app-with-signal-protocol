@@ -6,6 +6,10 @@ import android.content.SharedPreferences;
 import com.example.chat_app.rsa.RSAKeyPairGenerator;
 import com.example.chat_app.rsa.RSAUtils;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+
+
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -30,7 +34,7 @@ public class ExampleUnitTest {
     private static String privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALKydAtEull7PRXHKrL6ohFUNjOyiBTYXx25WP8l7mcRjrY365td4q4tc4/NxoGc1O/wcZVRgpoXvtrPujLMHYSTqk/QwXIKAvMZoQSCsMf9UH5OkNtEwXb2MOJEfXOrLQ5V2SXUFkXFwuKyjGOWux3ShUFMKH7OcswV+myglUMXAgMBAAECgYAp+WTsqK4lCp+kl+3dsKWU8HTy28K/MrvU3Y6cECrZpvQgtS3whrMSOrbkVm+ETnRuD8p+SnElBOLdvuF7wRpFf2uMD5lJmXy3cCEFybqUhPvF/t5aBXJoPV7NZUGGfxi1QvqYfRPvtYyXaAuwv5X0ZIb93EaSnBWuuxgSmSYgkQJBANxlI/rF17HQ5aR061QPbqMKdKpFz+cse9NzC0SMDX+vaw4iznhpKzM4OTPY0PFn3H+WnzGdd01L6utKWjw4GfUCQQDPkM/8m7H6snx27We6pcS45IEADQiTOQXqYd0vY6Z73AXd+2Wyzz+ZWtocKv7JAE5Jh6eajXFK7wXfX9rC8UVbAkBJT7twJ29gTsSUt++vvpJm2YuFOEO3+iwWYiZVXuD+oDNUOG/FzfX4y7L7dBvMsWe/aTL7Jg4RQDecnNb3QRIhAkEAv/eqpHJK1RWmT0eaG+GcY3PSav2i5KZkdjU0n9OF8h+3vWn40LskkuyXtF1/bt69iPvRYvtVwHv37nN0m78Q6QJBALAsXLYI+yypU7HN9x/bMgveYXlgyzf9bSYzUz66A87gwDQx2FFi4F0PrrLnisx6ibzb8w4eYM4CHn1LTlf5olk=";
 
     @Test
-    public void addition_isCorrect() throws NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, BadPaddingException {
+    public void addition_isCorrect() throws NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, FirebaseAuthException {
 
         //MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAMoI5zWLWhuFw1zUpvETg5ov6fi02ESpBbabbVCtp4UJklNuM0cLEpC0e/OO/TsCe6Qnzne0wpXAl3/LzqwwinAuY9G++lKi5Cs1GY7Cx8RrzMKb8Y0Vurcd3ajb22XjGzynyddqsZ8LMQjaYbsliIo7tZPI33dfiRCWhvPgE247AgMBAAECgYAKVCsx3xZzusJyoAKK56L+Qn3VM7WsyPFcVRThH4elcwhSkJs5ghToZfnCSWij2CwnB8vz7b9W9ZopM+u0fOTO4RjEa95G/Mf7ls799iS3UYr6ltLvCyC/Tkt73UWhQiZBX2xdDkB5m1xXCwDu+y9vaZa3zdtdjnE90Qs1yFPGwQJBAPPibfB6slQ6awAShSzpABVatU6xdFsooOJ4Z/xx7f4v6EKXcZg0I8XISC+YgJ+fFJ4pH4ovDB70rSL+9WKf7fsCQQDUEkFWQfooKA+IdQrMLoACrmcrvo87BqZoaj7xZ/ng6Cg3+/93hp92UDvFHCF9qpuMpyDNofwYcYb/KX4WB8zBAkBE9bqGa/suq9IDlDkJ6Nw4LYzksnKnMAbF4qvsir5zyFIROkdJdTzEOQyIQMPl3pJy4kfjx8fSnPaz1YnHGFevAkEAj8FEKv2UXm4xgVWdmSUYPzkL1LpbCy8J1JPY0PmjiBK3WKPo25QVOjVPHuFfzni88o5EDUB1y/gBA6yTvMlSwQJADfLUkNHsTOa/m1gqvEpRZ8lOMrb8gq5tBDWUhHUANQ+75dkKnQNpuYN4RbDoo55WoYqA8id83Mo8ZM7f1SSAEg==
 
@@ -42,6 +46,14 @@ public class ExampleUnitTest {
         System.out.println("Cipher Text: "+encryptedString);
         String decryptedString = RSAUtils.decrypt(encryptedString,receiverPrivateKey);
         System.out.println(decryptedString);
+
+
+
+    }
+    @Test
+    public void addition_isCorrect2() throws NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, FirebaseAuthException {
+
+
 
 
     }
