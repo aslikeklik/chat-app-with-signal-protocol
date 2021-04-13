@@ -9,10 +9,13 @@ android {
 
     defaultConfig {
         applicationId "com.example.chat_app"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
+
+
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,7 +49,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation 'com.github.GrenderG:Toasty:1.5.0'
-
+    implementation 'org.whispersystems:signal-protocol-android:2.8.1'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
 
 
