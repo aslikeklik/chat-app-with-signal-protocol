@@ -20,5 +20,6 @@ public class Message {
     String receiver;
     String sender;
     String msgTimeStamp;
+    Boolean decrypted=false;
 
 }

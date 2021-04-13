@@ -2,7 +2,7 @@ package com.example.chat_app.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import org.whispersystems.libsignal.state.PreKeyBundle;
+import org.whispersystems.libsignal.ecc.ECPublicKey;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,11 +17,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @IgnoreExtraProperties
-public class User {
-    String email;
-    String UID;
-    String name;
-    String surname;
-    PreKeyBundleMaker preKeyBundleMaker;
-    StoreMaker storeMaker;
+public class StoreMaker {
+    //InMemorySignalProtocolStore(IdentityKeyPair identityKeyPair, int registrationId)
+    //IdentityKeyPair(IdentityKey publicKey, ECPrivateKey privateKey)
+    //public IdentityKey(ECPublicKey publicKey)
+    String storeIdentityKey;
+    String storePrivateKey;
+    int registrationId;
 }
