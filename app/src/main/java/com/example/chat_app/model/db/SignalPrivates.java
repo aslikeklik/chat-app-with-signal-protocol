@@ -1,4 +1,4 @@
-package com.example.chat_app.model;
+package com.example.chat_app.model.db;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -17,8 +17,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @IgnoreExtraProperties
-public class KeyPairsMaker implements Serializable {
-    String preKeyPairPrivateKey;
-    String signedPreKeySignaturePrivateKey;
-    long timestamp;
+public class SignalPrivates implements Serializable {
+    String id;
+    String storeMaker;
+    String keyPairMaker;
 }

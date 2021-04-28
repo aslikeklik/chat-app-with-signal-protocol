@@ -71,14 +71,11 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<String> messageList=new ArrayList<>();
     private ArrayList<String> userList=new ArrayList<>();
     private ArrayAdapter<String> adapter;
-    private static String receiverPrivateKey, receiverPublicKey, senderPrivateKey;
-    private static Session aliceToBobSession, bobToAliceSession;
-    private static PreKeyBundle bobPreKeyBundle,alicePreKeyBundle;
-    private static SignalProtocolStore signalProtocolStore;
-    private static  SignalProtocolAddress signalProtocolAddress;
+    private Session aliceToBobSession;
+    private PreKeyBundle bobPreKeyBundle,alicePreKeyBundle;
+    private SignalProtocolStore signalProtocolStore;
+    private SignalProtocolAddress signalProtocolAddress;
 
-    private Cipher cipher, decipher;
-    private SecretKeySpec secretKeySpec;
 
     @RequiresApi(api=Build.VERSION_CODES.N)
     @Override
@@ -93,18 +90,10 @@ public class ChatActivity extends AppCompatActivity {
 
         String senderEmail=mAuth.getCurrentUser().getEmail();
         String senderUid=mAuth.getCurrentUser().getUid();
-        SharedPreferences sharedPref=this.getSharedPreferences("sharedPref",Context.MODE_PRIVATE);
-        // String privateKey= sharedPref.getString("123@123.com","yok falan");
 
 
         String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
-
-        //KEY DEFINING
-        receiverPrivateKey=sharedPref.getString(receiverEmail,"");
-        senderPrivateKey=sharedPref.getString(senderEmail,"");
-
-
 
         if(aliceToBobSession==null) {
 
@@ -112,7 +101,7 @@ public class ChatActivity extends AppCompatActivity {
                 @RequiresApi(api=Build.VERSION_CODES.O)
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    receiverPublicKey=snapshot.child("publicKey").getValue(String.class);
+
                     PreKeyBundleMaker preKeyBundleMaker=snapshot.child("preKeyBundleMaker").getValue(PreKeyBundleMaker.class);
                     bobPreKeyBundle=PreKeyBundleCreatorUtil.createPreKeyBundle(preKeyBundleMaker);
 

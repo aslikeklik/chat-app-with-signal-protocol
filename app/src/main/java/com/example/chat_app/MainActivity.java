@@ -25,8 +25,10 @@ import com.example.chat_app.fragments.KaydolFragment;
 import com.example.chat_app.model.PreKeyBundleMaker;
 import com.example.chat_app.model.StoreMaker;
 import com.example.chat_app.model.User;
+import com.example.chat_app.model.db.SignalPrivates;
 import com.example.chat_app.rsa.Entity;
 import com.example.chat_app.rsa.RSAKeyPairGenerator;
+import com.example.chat_app.util.ByteConverter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //
 
         editTextUserName=(EditText) findViewById(R.id.editTextUserName);
         editTextUserPassword=(EditText) findViewById(R.id.editTextUserPassword);
@@ -142,6 +145,28 @@ public class MainActivity extends AppCompatActivity {
                                     .storeIdentityKey(storeIdentityKey)
                                     .storePrivateKey(storePrivateKey)
                                     .build();
+
+                            /*
+                            Store Maker Byte
+                             */
+                            byte[] storeMakerByte=ByteConverter.makeByteStore(storeMaker);
+                            String stringStoreMaker=Base64.getEncoder().encodeToString(storeMakerByte);
+                            String id=mAuth.getCurrentUser().getUid();
+                            String keyPairMaker=null;
+
+                            SignalPrivates signalPrivates=SignalPrivates.builder()
+                                    .id(id)
+                                    .keyPairMaker(keyPairMaker)
+                                    .storeMaker(stringStoreMaker)
+                                    .build();
+                            /**
+                             * STOREMAKER VE ID YI BURDA DB YE ATACAĞIZ
+                             * KEYPAIRMAKERI ENTITYDE DB'NIN UPDATEBYID OZELLIGINI KULLANARAK ATACAGIZ
+                             * DB'DEN CHATACTIVITY'DE CEKİP DECODELUYACAĞIZ.
+                             **/
+
+
+
 
 
 

@@ -29,7 +29,7 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseAuth fAuth;
     private ArrayList<String> subjectLists = new ArrayList<>();
     private FirebaseDatabase db;
-    private DatabaseReference dbRef,msgDbRef;
+    private DatabaseReference dbRef;
     private ArrayAdapter<String> adapter;
     String receiverUid;
 
@@ -47,7 +47,6 @@ public class HomeActivity extends AppCompatActivity {
 
         db = FirebaseDatabase.getInstance();
         dbRef = db.getReference("Users");
-        msgDbRef=FirebaseDatabase.getInstance().getReference("Messages");
 
         adapter = new ArrayAdapter<String>(HomeActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, subjectLists);
         listView.setAdapter(adapter);

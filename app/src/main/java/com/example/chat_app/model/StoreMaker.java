@@ -4,6 +4,8 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 import org.whispersystems.libsignal.ecc.ECPublicKey;
 
+import java.io.Serializable;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @IgnoreExtraProperties
-public class StoreMaker {
+public class StoreMaker implements Serializable {
     //InMemorySignalProtocolStore(IdentityKeyPair identityKeyPair, int registrationId)
     //IdentityKeyPair(IdentityKey publicKey, ECPrivateKey privateKey)
     //public IdentityKey(ECPublicKey publicKey)
