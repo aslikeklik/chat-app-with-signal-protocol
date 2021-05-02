@@ -23,5 +23,4 @@ public class User {
     String name;
     String surname;
     PreKeyBundleMaker preKeyBundleMaker;
-    StoreMaker storeMaker;
 }

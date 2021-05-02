@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
                                     .name(name)
                                     .surname(surname)
                                     .preKeyBundleMaker(preKeyBundleMaker)
-                                    .storeMaker(storeMaker)
                                     .build();
 
 

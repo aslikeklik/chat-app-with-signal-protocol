@@ -23,6 +23,7 @@ import com.example.chat_app.model.KeyPairsMaker;
 import com.example.chat_app.model.Message;
 import com.example.chat_app.model.PreKeyBundleMaker;
 import com.example.chat_app.model.StoreMaker;
+import com.example.chat_app.rsa.Entity;
 import com.example.chat_app.rsa.Session;
 import com.example.chat_app.util.ByteConverter;
 import com.example.chat_app.util.InMemorySignalProtocolStoreCreatorUtil;
@@ -97,8 +98,11 @@ public class ChatActivity extends AppCompatActivity {
         String senderUid=mAuth.getCurrentUser().getUid();
 
 
+
         String receiverEmail=getIntent().getStringExtra("RECEIVER_EMAIL");
         String receiverUid=getIntent().getStringExtra("RECEIVER_UID");
+        database.execSQL("CREATE TABLE IF NOT EXISTS '"+sortUid(senderUid,receiverUid)+"' (message VARCHAR,receiver VARCHAR, sender VARCHAR,msgTimeStamp VARCHAR)");
+
 
         if(aliceToBobSession==null) {
 
@@ -172,64 +176,6 @@ public class ChatActivity extends AppCompatActivity {
 
                 }
             });
-
-
-
-/*
-            FirebaseDatabase.getInstance().getReference("Users").child(senderUid).addValueEventListener(new ValueEventListener() {
-                @RequiresApi(api=Build.VERSION_CODES.O)
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    StoreMaker storeMaker=snapshot.child("storeMaker").getValue(StoreMaker.class);
-
-
-                    Log.d("TAG","onDataChange: ");
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
- */
-
-/*
-            FirebaseDatabase.getInstance().getReference("privates").child(senderUid).addValueEventListener(new ValueEventListener() {
-                @RequiresApi(api=Build.VERSION_CODES.O)
-                @SneakyThrows
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    KeyPairsMaker keyPairsMaker=snapshot.getValue(KeyPairsMaker.class);
-                    byte[] decodedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getPreKeyPairPrivateKey());
-                    ECPrivateKey ecPrivateKey=Curve.decodePrivatePoint(decodedPrivateKey);
-                    ECKeyPair ecKeyPair=new ECKeyPair(alicePreKeyBundle.getPreKey(),ecPrivateKey);
-                    PreKeyRecord preKeyRecord=new PreKeyRecord(alicePreKeyBundle.getPreKeyId(),ecKeyPair);
-
-                    byte[] decodedSignedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getSignedPreKeySignaturePrivateKey());
-                    ECPrivateKey signedPrivateKey=Curve.decodePrivatePoint(decodedSignedPrivateKey);
-                    ECKeyPair signedPreKeyPair=new ECKeyPair(alicePreKeyBundle.getSignedPreKey(),signedPrivateKey);
-
-                    SignedPreKeyRecord signedPreKeyRecord=new SignedPreKeyRecord(
-                            alicePreKeyBundle.getSignedPreKeyId(),keyPairsMaker.getTimestamp(),signedPreKeyPair,alicePreKeyBundle.getSignedPreKeySignature());
-
-                    signalProtocolStore.storePreKey(alicePreKeyBundle.getPreKeyId(),preKeyRecord);
-                    signalProtocolStore.storeSignedPreKey(alicePreKeyBundle.getSignedPreKeyId(),signedPreKeyRecord);
-
-                    signalProtocolAddress=new SignalProtocolAddress(receiverUid,1);
-
-                    aliceToBobSession=new Session(signalProtocolStore,bobPreKeyBundle,signalProtocolAddress);
-
-                    Log.d("TAG","onDataChange: ");
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
- */
-
         }
 
             String sortUid=sortUid(receiverUid,senderUid);
@@ -240,9 +186,13 @@ public class ChatActivity extends AppCompatActivity {
                     // Cast the current view as a TextView
                     TextView tv=(TextView) super.getView(position,convertView,parent);
 
-                    if (userList.get(position).equals(receiverEmail))
-                        tv.setGravity(Gravity.RIGHT);
-                    else tv.setGravity(Gravity.LEFT);
+                  /*
+                    if (!userList.isEmpty()) {
+                            if (userList.get(position).equals(receiverEmail))
+                            tv.setGravity(Gravity.RIGHT);
+                        else tv.setGravity(Gravity.LEFT);
+                    }
+                   */
 
                     return tv;
                 }
@@ -258,8 +208,6 @@ public class ChatActivity extends AppCompatActivity {
             @RequiresApi(api=Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                messageList.clear();
-                userList.clear();
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Message message=dataSnapshot.getValue(Message.class);
@@ -273,16 +221,20 @@ public class ChatActivity extends AppCompatActivity {
                         plainText=aliceToBobSession.decrypt(toBobMessageDecrypt);
                         message.setMessage(plainText);
                         message.setDecrypted(true);
-                        FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).child(message.getMsgTimeStamp()).setValue(message);
+                   //     FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).child(message.getMsgTimeStamp()).setValue(message);
+
+                        database.execSQL("INSERT INTO  '"+sortUid+"' (message,receiver, sender,msgTimeStamp) " +
+                                "VALUES ('"+plainText+"','"+receiverEmail+"','"+ mAuth.getCurrentUser().getEmail()+"','"+message.getMsgTimeStamp()+"')");
 
                     }
 
 
                  //   adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
                   //  adapter.notifyDataSetChanged();
-                    messageList.add(plainText);
-                    listView.setAdapter(adapter);
-                    userList.add(message.getReceiver());
+
+                   // messageList.add(plainText);
+                   // listView.setAdapter(adapter);
+                 //   userList.add(message.getReceiver());
                 }
 
                 }
@@ -292,6 +244,20 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+
+
+            userList.clear();
+            messageList.clear();
+            Cursor cursor=database.rawQuery("SELECT * FROM '" + sortUid + "'",null);
+            while (cursor.moveToNext()) {
+                messageList.add(cursor.getString(0));
+                userList.add(cursor.getString(1));
+                listView.setAdapter(adapter);
+            }
+            cursor.close();
+            
+
+
 
 
     }
@@ -309,7 +275,6 @@ public class ChatActivity extends AppCompatActivity {
         PreKeySignalMessage toBobMessage = aliceToBobSession.encrypt(messageText);
         String signalCipherText=Base64.getEncoder().encodeToString(toBobMessage.serialize());
 
-
         Message message=Message.builder()
                 .message(signalCipherText)
                 .receiver(receiverEmail)
@@ -317,6 +282,23 @@ public class ChatActivity extends AppCompatActivity {
                 .msgTimeStamp(timestamp)
                 .decrypted(false)
                 .build();
+
+        //GÖNDERİLEN MESAJLARI DB YE ATTIK
+
+
+        database.execSQL("INSERT INTO  '"+sortedUid+"' (message,receiver, sender,msgTimeStamp) " +
+                "VALUES ('"+messageText+"','"+receiverEmail+"','"+ mAuth.getCurrentUser().getEmail()+"','"+timestamp+"')");
+
+
+        messageList.clear();
+        Cursor cursor=database.rawQuery("SELECT * FROM '"+sortedUid+"'",null);
+        while (cursor.moveToNext()){
+            messageList.add(cursor.getString(0));
+            listView.setAdapter(adapter);
+        }
+        cursor.close();
+
+
         FirebaseDatabase.getInstance().getReference("Messages").child(sortedUid).child(timestamp).setValue(message);
 
     }
