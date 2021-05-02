@@ -141,6 +141,7 @@ public class ChatActivity extends AppCompatActivity {
                             StoreMaker storeMaker=ByteConverter.readStore(Base64.getDecoder().decode(storeMakerString));
                             signalProtocolStore=InMemorySignalProtocolStoreCreatorUtil.createStore(storeMaker);
 
+
                             keyPairMakerString = c.getString(2);
                             KeyPairsMaker keyPairsMaker=ByteConverter.readKeyPairs(Base64.getDecoder().decode(keyPairMakerString));
                             byte[] decodedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getPreKeyPairPrivateKey());
@@ -186,14 +187,12 @@ public class ChatActivity extends AppCompatActivity {
                     // Cast the current view as a TextView
                     TextView tv=(TextView) super.getView(position,convertView,parent);
 
-                  /*
+
                     if (!userList.isEmpty()) {
                             if (userList.get(position).equals(receiverEmail))
                             tv.setGravity(Gravity.RIGHT);
                         else tv.setGravity(Gravity.LEFT);
                     }
-                   */
-
                     return tv;
                 }
             };
@@ -221,7 +220,9 @@ public class ChatActivity extends AppCompatActivity {
                         plainText=aliceToBobSession.decrypt(toBobMessageDecrypt);
                         message.setMessage(plainText);
                         message.setDecrypted(true);
-                   //     FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).child(message.getMsgTimeStamp()).setValue(message);
+
+                        //REMOVE DENIYCEGIM !!!!!!!!!!!!!!!!!!!!!!
+                      FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).child(message.getMsgTimeStamp()).removeValue();
 
                         database.execSQL("INSERT INTO  '"+sortUid+"' (message,receiver, sender,msgTimeStamp) " +
                                 "VALUES ('"+plainText+"','"+receiverEmail+"','"+ mAuth.getCurrentUser().getEmail()+"','"+message.getMsgTimeStamp()+"')");
@@ -290,6 +291,7 @@ public class ChatActivity extends AppCompatActivity {
                 "VALUES ('"+messageText+"','"+receiverEmail+"','"+ mAuth.getCurrentUser().getEmail()+"','"+timestamp+"')");
 
 
+        /*
         messageList.clear();
         Cursor cursor=database.rawQuery("SELECT * FROM '"+sortedUid+"'",null);
         while (cursor.moveToNext()){
@@ -297,6 +299,8 @@ public class ChatActivity extends AppCompatActivity {
             listView.setAdapter(adapter);
         }
         cursor.close();
+
+         */
 
 
         FirebaseDatabase.getInstance().getReference("Messages").child(sortedUid).child(timestamp).setValue(message);
