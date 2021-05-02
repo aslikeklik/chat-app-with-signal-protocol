@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +24,7 @@ import com.example.chat_app.model.Message;
 import com.example.chat_app.model.PreKeyBundleMaker;
 import com.example.chat_app.model.StoreMaker;
 import com.example.chat_app.rsa.Session;
+import com.example.chat_app.util.ByteConverter;
 import com.example.chat_app.util.InMemorySignalProtocolStoreCreatorUtil;
 import com.example.chat_app.util.PreKeyBundleCreatorUtil;
 import com.google.firebase.auth.FirebaseAuth;
@@ -75,13 +78,15 @@ public class ChatActivity extends AppCompatActivity {
     private PreKeyBundle bobPreKeyBundle,alicePreKeyBundle;
     private SignalProtocolStore signalProtocolStore;
     private SignalProtocolAddress signalProtocolAddress;
+    private SQLiteDatabase database;
 
-
-    @RequiresApi(api=Build.VERSION_CODES.N)
+    @RequiresApi(api=Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        database=this.openOrCreateDatabase("Privates",MODE_PRIVATE,null);
 
         messageEditText=findViewById(R.id.messageEditText);
         databaseReference=FirebaseDatabase.getInstance().getReference("Messages");
@@ -122,6 +127,43 @@ public class ChatActivity extends AppCompatActivity {
                     PreKeyBundleMaker preKeyBundleMaker=snapshot.child("preKeyBundleMaker").getValue(PreKeyBundleMaker.class);
                     alicePreKeyBundle=PreKeyBundleCreatorUtil.createPreKeyBundle(preKeyBundleMaker);
 
+                    String id,storeMakerString=null,keyPairMakerString=null;
+                    Cursor c=database.rawQuery("SELECT * FROM SignalPrivates WHERE id='"+senderUid+"' ",null);
+                    if (c.moveToFirst()){
+                        do {
+                            // Passing values
+                            id = c.getString(0);
+                            storeMakerString = c.getString(1);
+                            StoreMaker storeMaker=ByteConverter.readStore(Base64.getDecoder().decode(storeMakerString));
+                            signalProtocolStore=InMemorySignalProtocolStoreCreatorUtil.createStore(storeMaker);
+
+                            keyPairMakerString = c.getString(2);
+                            KeyPairsMaker keyPairsMaker=ByteConverter.readKeyPairs(Base64.getDecoder().decode(keyPairMakerString));
+                            byte[] decodedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getPreKeyPairPrivateKey());
+                            ECPrivateKey ecPrivateKey=Curve.decodePrivatePoint(decodedPrivateKey);
+                            ECKeyPair ecKeyPair=new ECKeyPair(alicePreKeyBundle.getPreKey(),ecPrivateKey);
+                            PreKeyRecord preKeyRecord=new PreKeyRecord(alicePreKeyBundle.getPreKeyId(),ecKeyPair);
+
+                            byte[] decodedSignedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getSignedPreKeySignaturePrivateKey());
+                            ECPrivateKey signedPrivateKey=Curve.decodePrivatePoint(decodedSignedPrivateKey);
+                            ECKeyPair signedPreKeyPair=new ECKeyPair(alicePreKeyBundle.getSignedPreKey(),signedPrivateKey);
+
+                            SignedPreKeyRecord signedPreKeyRecord=new SignedPreKeyRecord(
+                                    alicePreKeyBundle.getSignedPreKeyId(),keyPairsMaker.getTimestamp(),signedPreKeyPair,alicePreKeyBundle.getSignedPreKeySignature());
+
+                            signalProtocolStore.storePreKey(alicePreKeyBundle.getPreKeyId(),preKeyRecord);
+                            signalProtocolStore.storeSignedPreKey(alicePreKeyBundle.getSignedPreKeyId(),signedPreKeyRecord);
+
+                            signalProtocolAddress=new SignalProtocolAddress(receiverUid,1);
+
+                            aliceToBobSession=new Session(signalProtocolStore,bobPreKeyBundle,signalProtocolAddress);
+
+                            // Do something Here with values
+                        } while(c.moveToNext());
+                    }
+                    c.close();
+
+
                     Log.d("TAG","onDataChange: ");
                 }
 
@@ -131,12 +173,16 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
 
+
+
+/*
             FirebaseDatabase.getInstance().getReference("Users").child(senderUid).addValueEventListener(new ValueEventListener() {
                 @RequiresApi(api=Build.VERSION_CODES.O)
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     StoreMaker storeMaker=snapshot.child("storeMaker").getValue(StoreMaker.class);
-                    signalProtocolStore=InMemorySignalProtocolStoreCreatorUtil.createStore(storeMaker);
+
+
                     Log.d("TAG","onDataChange: ");
                 }
                 @Override
@@ -145,6 +191,9 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
 
+ */
+
+/*
             FirebaseDatabase.getInstance().getReference("privates").child(senderUid).addValueEventListener(new ValueEventListener() {
                 @RequiresApi(api=Build.VERSION_CODES.O)
                 @SneakyThrows
@@ -178,6 +227,8 @@ public class ChatActivity extends AppCompatActivity {
 
                 }
             });
+
+ */
 
         }
 

@@ -3,6 +3,8 @@ package com.example.chat_app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtRegister;
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
+    private SQLiteDatabase database;
 
 
     @RequiresApi(api=Build.VERSION_CODES.O)
@@ -75,6 +78,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //
+        try{
+            database=this.openOrCreateDatabase("Privates",MODE_PRIVATE,null);
+            database.execSQL("CREATE TABLE IF NOT EXISTS SignalPrivates (id VARCHAR,storeMaker VARCHAR,keyPairMaker VARCHAR)");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
         editTextUserName=(EditText) findViewById(R.id.editTextUserName);
         editTextUserPassword=(EditText) findViewById(R.id.editTextUserPassword);
@@ -90,12 +100,9 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new GirisFragment()).commit();
         }
-
-
+        
         mAuth=FirebaseAuth.getInstance();
         firebaseUser=mAuth.getCurrentUser(); // authenticate olan kullaniciyi aliyoruz eger var ise
-
-
 
     }
 
@@ -164,10 +171,7 @@ public class MainActivity extends AppCompatActivity {
                              * KEYPAIRMAKERI ENTITYDE DB'NIN UPDATEBYID OZELLIGINI KULLANARAK ATACAGIZ
                              * DB'DEN CHATACTIVITY'DE CEKİP DECODELUYACAĞIZ.
                              **/
-
-
-
-
+                            database.execSQL("INSERT INTO SignalPrivates (id,storeMaker, keyPairMaker) VALUES ('"+id+"','"+stringStoreMaker+"','"+Entity.keyPairMakerString+"')");
 
 
                             String email=mAuth.getCurrentUser().getEmail();

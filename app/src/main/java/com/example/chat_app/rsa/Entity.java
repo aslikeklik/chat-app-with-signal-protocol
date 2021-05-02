@@ -1,11 +1,13 @@
 package com.example.chat_app.rsa;
 
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
 import com.example.chat_app.model.KeyPairsMaker;
+import com.example.chat_app.util.ByteConverter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -24,14 +26,20 @@ import org.whispersystems.libsignal.state.SignedPreKeyRecord;
 import org.whispersystems.libsignal.state.impl.InMemorySignalProtocolStore;
 import org.whispersystems.libsignal.util.KeyHelper;
 
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Random;
+
+import lombok.SneakyThrows;
 
 public class Entity {
     private final SignalProtocolStore store;
     private final PreKeyBundle preKey;
     private final SignalProtocolAddress address;
+    private SQLiteDatabase database;
+    public static String keyPairMakerString;
 
+    @SneakyThrows
     @RequiresApi(api=Build.VERSION_CODES.O)
     public Entity(int preKeyId,int signedPreKeyId,String address)
             throws InvalidKeyException
@@ -61,6 +69,8 @@ public class Entity {
                 .preKeyPairPrivateKey(preKeyPairPrivateKey)
                 .signedPreKeySignaturePrivateKey(signedPrivateKey)
                 .timestamp(timestamp).build();
+
+        keyPairMakerString=Base64.getEncoder().encodeToString(ByteConverter.makeByteKeyPairs(keyPairsMaker));
 
         FirebaseDatabase.getInstance().getReference("privates").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(keyPairsMaker);
         ECPublicKey signedPreKeyPublic = signedPreKeyPair.getPublicKey();
