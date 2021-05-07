@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+
 import com.example.chat_app.model.KeyPairsMaker;
 import com.example.chat_app.model.Message;
 import com.example.chat_app.model.PreKeyBundleMaker;
@@ -181,7 +182,6 @@ public class ChatActivity extends AppCompatActivity {
 
             String sortUid=sortUid(receiverUid,senderUid);
 
-
             adapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,messageList) {
                 public View getView(int position,View convertView,ViewGroup parent) {
                     // Cast the current view as a TextView
@@ -229,13 +229,6 @@ public class ChatActivity extends AppCompatActivity {
 
                     }
 
-
-                 //   adapter = new ArrayAdapter<String>(ChatActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, messageList);
-                  //  adapter.notifyDataSetChanged();
-
-                   // messageList.add(plainText);
-                   // listView.setAdapter(adapter);
-                 //   userList.add(message.getReceiver());
                 }
 
                 }
@@ -290,17 +283,6 @@ public class ChatActivity extends AppCompatActivity {
         database.execSQL("INSERT INTO  '"+sortedUid+"' (message,receiver, sender,msgTimeStamp) " +
                 "VALUES ('"+messageText+"','"+receiverEmail+"','"+ mAuth.getCurrentUser().getEmail()+"','"+timestamp+"')");
 
-
-        /*
-        messageList.clear();
-        Cursor cursor=database.rawQuery("SELECT * FROM '"+sortedUid+"'",null);
-        while (cursor.moveToNext()){
-            messageList.add(cursor.getString(0));
-            listView.setAdapter(adapter);
-        }
-        cursor.close();
-
-         */
 
 
         FirebaseDatabase.getInstance().getReference("Messages").child(sortedUid).child(timestamp).setValue(message);

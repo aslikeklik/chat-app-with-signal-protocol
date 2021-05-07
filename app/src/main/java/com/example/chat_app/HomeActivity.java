@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.chat_app.adapters.CustomAdapter;
 import com.example.chat_app.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -31,6 +32,7 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseDatabase db;
     private DatabaseReference dbRef;
     private ArrayAdapter<String> adapter;
+
     String receiverUid;
 
     @Override
@@ -48,13 +50,21 @@ public class HomeActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance();
         dbRef = db.getReference("Users");
 
-        adapter = new ArrayAdapter<String>(HomeActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, subjectLists);
-        listView.setAdapter(adapter);
 
+
+
+        ArrayList<String> userNameList=new ArrayList<>();
+
+        adapter=new CustomAdapter(HomeActivity.this,userNameList,subjectLists);
+        // adapter = new ArrayAdapter<String>(HomeActivity.this, R.layout.item_chat_list, R.id.userName, subjectLists);
+        listView.setAdapter(adapter);
         dbRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 User user=snapshot.getValue(User.class);
+                String name=user.getName();
+                String surname=user.getSurname();
+                userNameList.add(name+" "+surname);
                 String value=user.getEmail();
                 if(!value.equals(fAuth.getCurrentUser().getEmail().toString())) {
                     subjectLists.add(value);
