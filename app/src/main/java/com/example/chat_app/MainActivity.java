@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                                     .name(name)
                                     .surname(surname)
                                     .preKeyBundleMaker(preKeyBundleMaker)
+                                    .online(true)
                                     .build();
 
 
@@ -217,19 +218,17 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d("TAG","signUserWithEmail:success");
                             //   FirebaseUser user = mAuth.getCurrentUser();
+                            FirebaseDatabase.getInstance().getReference("Users").child(mAuth.getCurrentUser().getUid()).child("online").setValue(true);
 
                             startActivity(new Intent(MainActivity.this,HomeActivity.class));
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w("TAG","signUserWithEmail:failure",task.getException());
                             Toasty.error(getApplicationContext(), "This is an error toast.", Toast.LENGTH_SHORT, true).show();
 
 
                         }
 
-                        // ...
                     }
                 });
     }

@@ -29,15 +29,13 @@ public class HomeActivity extends AppCompatActivity {
     private ListView listView;
     private FirebaseAuth fAuth;
     private ArrayList<String> subjectLists = new ArrayList<>();
+    ArrayList<String> userNameList=new ArrayList<>();
+    ArrayList<String> onlineList=new ArrayList<>();
     private FirebaseDatabase db;
     private DatabaseReference dbRef;
     private ArrayAdapter<String> adapter;
 
     String receiverUid;
-
-    @Override
-    public void onBackPressed() {
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,21 +51,24 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-        ArrayList<String> userNameList=new ArrayList<>();
 
-        adapter=new CustomAdapter(HomeActivity.this,userNameList,subjectLists);
+        adapter=new CustomAdapter(HomeActivity.this,userNameList,onlineList);
         adapter.notifyDataSetChanged();
         listView.setAdapter(adapter);
         dbRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 User user=snapshot.getValue(User.class);
+
                 String name=user.getName();
                 String surname=user.getSurname();
                 String value=user.getEmail();
-                if(!value.equals(fAuth.getCurrentUser().getEmail().toString())) {
+                Boolean isOnline=user.getOnline();
+
+                if(!value.equals(fAuth.getCurrentUser().getEmail())) {
                     subjectLists.add(value);
                     userNameList.add(name+" "+surname);
+                    onlineList.add(isOnline.toString());
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -112,7 +113,6 @@ public class HomeActivity extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         }
-
                     }
 
                     @Override
@@ -154,6 +154,7 @@ public class HomeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.exit:
+                FirebaseDatabase.getInstance().getReference("Users").child(fAuth.getUid()).child("online").setValue(false);
                 fAuth.signOut();
                 startActivity(new Intent(this,MainActivity.class));
                 return true;
