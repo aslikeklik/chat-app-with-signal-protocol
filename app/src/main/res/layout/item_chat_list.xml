@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginBottom="8dp"
-    >
+    android:layout_marginBottom="8dp">
 
     <ImageView
         android:id="@+id/userProfilePicture"
@@ -14,31 +13,41 @@
         android:background="@drawable/ic_baseline_person_24"
         android:scaleType="fitXY"
         app:layout_constraintStart_toStartOf="parent"
-
         app:layout_constraintTop_toTopOf="parent" />
-    <TextView
-        android:layout_marginStart="8dp"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/userProfilePicture"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:textSize="18sp"
-        android:text="gargara ustası gargara ustası"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="8dp"
-        android:id="@+id/userName"
-        />
 
     <TextView
+        android:id="@+id/userName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/userProfilePicture"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userName"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:text="gargara ustası gargara ustası"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/userProfilePicture"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/isOnline"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/ic_baseline_brightness_1_24"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/userProfilePicture"
+        app:layout_constraintTop_toBottomOf="@id/userName" />
+
+    <TextView
         android:id="@+id/surname"
-        />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/isOnline"
+        app:layout_constraintTop_toBottomOf="@id/userName"
+        app:layout_goneMarginStart="8dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

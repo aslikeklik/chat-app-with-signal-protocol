@@ -72,7 +72,7 @@ public class Entity {
 
         keyPairMakerString=Base64.getEncoder().encodeToString(ByteConverter.makeByteKeyPairs(keyPairsMaker));
 
-        FirebaseDatabase.getInstance().getReference("privates").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(keyPairsMaker);
+       // FirebaseDatabase.getInstance().getReference("privates").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(keyPairsMaker);
         ECPublicKey signedPreKeyPublic = signedPreKeyPair.getPublicKey();
 
         this.preKey = new PreKeyBundle(

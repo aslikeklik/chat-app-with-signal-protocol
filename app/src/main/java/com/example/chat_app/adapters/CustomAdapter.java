@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.chat_app.R;
@@ -43,11 +44,15 @@ public class CustomAdapter extends ArrayAdapter<String>
         TextView your_first_text_view = (TextView) rowView.findViewById(R.id.userName);
         TextView your_second_text_view = (TextView) rowView.findViewById(R.id.surname);
 
+        ImageView is_online_dot = (ImageView) rowView.findViewById(R.id.isOnline);
         if (strings.size()>position) {
             your_first_text_view.setText(strings.get(position));
             if (strings1.get(position).equals("false"))
-            your_second_text_view.setText("Çevrimdışı"); //Instead of the same value use position + 1, or something appropriate
-            else your_second_text_view.setText("Çevrimiçi");
+                your_second_text_view.setText("Çevrimdışı"); //Instead of the same value use position + 1, or something appropriate
+            else{
+                your_second_text_view.setText("Çevrimiçi");
+                is_online_dot.setVisibility(View.VISIBLE);
+            }
         }
 
         return rowView;
