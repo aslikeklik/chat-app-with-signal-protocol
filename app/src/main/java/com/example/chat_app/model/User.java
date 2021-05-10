@@ -2,6 +2,8 @@ package com.example.chat_app.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import org.whispersystems.libsignal.state.PreKeyBundle;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,5 +22,6 @@ public class User {
     String UID;
     String name;
     String surname;
-    String publicKey;
+    PreKeyBundleMaker preKeyBundleMaker;
+    Boolean online;
 }

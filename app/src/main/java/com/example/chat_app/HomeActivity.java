@@ -2,6 +2,7 @@ package com.example.chat_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.chat_app.adapters.CustomAdapter;
 import com.example.chat_app.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -28,14 +30,13 @@ public class HomeActivity extends AppCompatActivity {
     private ListView listView;
     private FirebaseAuth fAuth;
     private ArrayList<String> subjectLists = new ArrayList<>();
+    ArrayList<String> userNameList=new ArrayList<>();
+    ArrayList<String> onlineList=new ArrayList<>();
     private FirebaseDatabase db;
-    private DatabaseReference dbRef,msgDbRef;
+    private DatabaseReference dbRef;
     private ArrayAdapter<String> adapter;
-    String receiverUid;
 
-    @Override
-    public void onBackPressed() {
-    }
+    String receiverUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,25 +48,38 @@ public class HomeActivity extends AppCompatActivity {
 
         db = FirebaseDatabase.getInstance();
         dbRef = db.getReference("Users");
-        msgDbRef=FirebaseDatabase.getInstance().getReference("Messages");
 
-        adapter = new ArrayAdapter<String>(HomeActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, subjectLists);
-        listView.setAdapter(adapter);
+        adapter=new CustomAdapter(HomeActivity.this,userNameList,onlineList);
+        adapter.notifyDataSetChanged();
 
         dbRef.addChildEventListener(new ChildEventListener() {
+
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 User user=snapshot.getValue(User.class);
-                String value=user.getEmail();
-                if(!value.equals(fAuth.getCurrentUser().getEmail().toString())) {
-                    subjectLists.add(value);
-                    adapter.notifyDataSetChanged();
 
+                String name=user.getName();
+                String surname=user.getSurname();
+                String value=user.getEmail();
+                Boolean isOnline=user.getOnline();
+
+                if(!value.equals(fAuth.getCurrentUser().getEmail())) {
+                    subjectLists.add(value);
+                    userNameList.add(name+" "+surname);
+                    onlineList.add(isOnline.toString());
+                    adapter.notifyDataSetChanged();
                 }
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                User user=snapshot.getValue(User.class);
+                for(int i=0;i<subjectLists.size();i++){
+                    if (subjectLists.get(i).equals(user.getEmail())){
+                        onlineList.set(i,user.getOnline().toString());
+                        adapter.notifyDataSetChanged();
+                    }
+                }
 
             }
 
@@ -86,6 +100,9 @@ public class HomeActivity extends AppCompatActivity {
         });
 
 
+        listView.setAdapter(adapter);
+
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -104,7 +121,6 @@ public class HomeActivity extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         }
-
                     }
 
                     @Override
@@ -133,7 +149,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-
+        adapter.notifyDataSetChanged();
     }
 
      @Override
@@ -146,6 +162,8 @@ public class HomeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.exit:
+                FirebaseDatabase.getInstance().getReference("Users").child(fAuth.getUid()).child("online").setValue(false);
+                adapter.notifyDataSetChanged();
                 fAuth.signOut();
                 startActivity(new Intent(this,MainActivity.class));
                 return true;

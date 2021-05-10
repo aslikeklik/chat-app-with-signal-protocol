@@ -1,6 +1,8 @@
-package com.example.chat_app.model;
+package com.example.chat_app.model.db;
 
 import com.google.firebase.database.IgnoreExtraProperties;
+
+import java.io.Serializable;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,11 +17,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @IgnoreExtraProperties
-public class Message {
-    String message;
-    String receiver;
-    String sender;
-    String msgTimeStamp;
-    Boolean decrypted=false;
-
+public class SignalPrivates implements Serializable {
+    String id;
+    String storeMaker;
+    String keyPairMaker;
 }

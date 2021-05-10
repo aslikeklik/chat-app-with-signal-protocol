@@ -15,11 +15,13 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @IgnoreExtraProperties
-public class Message {
-    String message;
-    String receiver;
-    String sender;
-    String msgTimeStamp;
-    Boolean decrypted=false;
-
+public class PreKeyBundleMaker {
+    int registrationId;
+    int deviceId;
+    int preKeyId;
+    String preKeyPublic; //ECPublicKey
+    int signedPreKeyId;
+    String signedPreKeyPublic; //ECPublicKey
+    String identityPreKeySignature; //byte []
+    String identityKey;  //IdentityKey
 }
