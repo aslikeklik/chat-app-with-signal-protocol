@@ -45,7 +45,9 @@ public class CustomAdapter extends ArrayAdapter<String>
 
         if (strings.size()>position) {
             your_first_text_view.setText(strings.get(position));
-            your_second_text_view.setText(strings1.get(position)); //Instead of the same value use position + 1, or something appropriate
+            if (strings1.get(position).equals("false"))
+            your_second_text_view.setText("Çevrimdışı"); //Instead of the same value use position + 1, or something appropriate
+            else your_second_text_view.setText("Çevrimiçi");
         }
 
         return rowView;

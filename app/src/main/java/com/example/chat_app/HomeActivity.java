@@ -2,6 +2,7 @@ package com.example.chat_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,14 +49,11 @@ public class HomeActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance();
         dbRef = db.getReference("Users");
 
-
-
-
-
         adapter=new CustomAdapter(HomeActivity.this,userNameList,onlineList);
         adapter.notifyDataSetChanged();
-        listView.setAdapter(adapter);
+
         dbRef.addChildEventListener(new ChildEventListener() {
+
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 User user=snapshot.getValue(User.class);
@@ -75,6 +73,13 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                User user=snapshot.getValue(User.class);
+                for(int i=0;i<subjectLists.size();i++){
+                    if (subjectLists.get(i).equals(user.getEmail())){
+                        onlineList.set(i,user.getOnline().toString());
+                        adapter.notifyDataSetChanged();
+                    }
+                }
 
             }
 
@@ -93,6 +98,9 @@ public class HomeActivity extends AppCompatActivity {
 
             }
         });
+
+
+        listView.setAdapter(adapter);
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -155,6 +163,7 @@ public class HomeActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.exit:
                 FirebaseDatabase.getInstance().getReference("Users").child(fAuth.getUid()).child("online").setValue(false);
+                adapter.notifyDataSetChanged();
                 fAuth.signOut();
                 startActivity(new Intent(this,MainActivity.class));
                 return true;
