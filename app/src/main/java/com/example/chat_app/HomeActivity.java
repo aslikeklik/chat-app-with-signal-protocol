@@ -69,7 +69,6 @@ public class HomeActivity extends AppCompatActivity {
                 if(!value.equals(fAuth.getCurrentUser().getEmail().toString())) {
                     subjectLists.add(value);
                     adapter.notifyDataSetChanged();
-
                 }
             }
 

@@ -43,8 +43,8 @@ public class CustomAdapter extends ArrayAdapter<String>
         TextView your_first_text_view = (TextView) rowView.findViewById(R.id.userName);
         TextView your_second_text_view = (TextView) rowView.findViewById(R.id.surname);
 
-        if (strings.size()>position+1) {
-            your_first_text_view.setText(strings.get(position));
+        if (strings.size()-1>position+1) {
+            your_first_text_view.setText(strings.get(position+1));
             your_second_text_view.setText(strings1.get(position)); //Instead of the same value use position + 1, or something appropriate
         }
 

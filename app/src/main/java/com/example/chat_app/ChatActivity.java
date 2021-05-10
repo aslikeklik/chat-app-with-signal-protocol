@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -68,7 +69,6 @@ import static com.example.chat_app.rsa.RSAUtils.encrypt;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private DatabaseReference databaseReference;
     private EditText messageEditText;
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
@@ -81,6 +81,9 @@ public class ChatActivity extends AppCompatActivity {
     private SignalProtocolStore signalProtocolStore;
     private SignalProtocolAddress signalProtocolAddress;
     private SQLiteDatabase database;
+    public static PreKeyRecord preKeyRecord;
+    public static SignedPreKeyRecord signedPreKeyRecord;
+
 
     @RequiresApi(api=Build.VERSION_CODES.O)
     @Override
@@ -91,7 +94,6 @@ public class ChatActivity extends AppCompatActivity {
         database=this.openOrCreateDatabase("Privates",MODE_PRIVATE,null);
 
         messageEditText=findViewById(R.id.messageEditText);
-        databaseReference=FirebaseDatabase.getInstance().getReference("Messages");
         mAuth=FirebaseAuth.getInstance();
         listView=findViewById(R.id.messageListView);
 
@@ -148,13 +150,13 @@ public class ChatActivity extends AppCompatActivity {
                             byte[] decodedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getPreKeyPairPrivateKey());
                             ECPrivateKey ecPrivateKey=Curve.decodePrivatePoint(decodedPrivateKey);
                             ECKeyPair ecKeyPair=new ECKeyPair(alicePreKeyBundle.getPreKey(),ecPrivateKey);
-                            PreKeyRecord preKeyRecord=new PreKeyRecord(alicePreKeyBundle.getPreKeyId(),ecKeyPair);
+                            preKeyRecord=new PreKeyRecord(alicePreKeyBundle.getPreKeyId(),ecKeyPair);
 
                             byte[] decodedSignedPrivateKey=Base64.getDecoder().decode(keyPairsMaker.getSignedPreKeySignaturePrivateKey());
                             ECPrivateKey signedPrivateKey=Curve.decodePrivatePoint(decodedSignedPrivateKey);
                             ECKeyPair signedPreKeyPair=new ECKeyPair(alicePreKeyBundle.getSignedPreKey(),signedPrivateKey);
 
-                            SignedPreKeyRecord signedPreKeyRecord=new SignedPreKeyRecord(
+                            signedPreKeyRecord=new SignedPreKeyRecord(
                                     alicePreKeyBundle.getSignedPreKeyId(),keyPairsMaker.getTimestamp(),signedPreKeyPair,alicePreKeyBundle.getSignedPreKeySignature());
 
                             signalProtocolStore.storePreKey(alicePreKeyBundle.getPreKeyId(),preKeyRecord);
@@ -189,8 +191,9 @@ public class ChatActivity extends AppCompatActivity {
 
 
                     if (!userList.isEmpty()) {
-                            if (userList.get(position).equals(receiverEmail))
-                            tv.setGravity(Gravity.RIGHT);
+                        if (userList.get(position).equals(receiverEmail)) {
+                                tv.setGravity(Gravity.RIGHT);
+                            }
                         else tv.setGravity(Gravity.LEFT);
                     }
                     return tv;
@@ -199,9 +202,9 @@ public class ChatActivity extends AppCompatActivity {
 
 
 
-        FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).addValueEventListener(new ValueEventListener() {
+        ArrayList<String> previousCipherText=new ArrayList<>();
 
-            ArrayList<String> previousCipherText=new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).addValueEventListener(new ValueEventListener() {
 
             @SneakyThrows
             @RequiresApi(api=Build.VERSION_CODES.O)
@@ -217,15 +220,30 @@ public class ChatActivity extends AppCompatActivity {
                         byte[] ds=Base64.getDecoder().decode(plainText);
                         PreKeySignalMessage toBobMessageDecrypt = new PreKeySignalMessage(ds);
                         previousCipherText.add(plainText);
+
+                        signalProtocolStore.storePreKey(alicePreKeyBundle.getPreKeyId(),preKeyRecord);
+                        signalProtocolStore.storeSignedPreKey(alicePreKeyBundle.getSignedPreKeyId(),signedPreKeyRecord);
+
+                        signalProtocolAddress=new SignalProtocolAddress(receiverUid,1);
+
+                        aliceToBobSession=new Session(signalProtocolStore,bobPreKeyBundle,signalProtocolAddress);
+
                         plainText=aliceToBobSession.decrypt(toBobMessageDecrypt);
                         message.setMessage(plainText);
                         message.setDecrypted(true);
 
+                        FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).child(message.getMsgTimeStamp()).setValue(message);
                         //REMOVE DENIYCEGIM !!!!!!!!!!!!!!!!!!!!!!
                       FirebaseDatabase.getInstance().getReference("Messages").child(sortUid).child(message.getMsgTimeStamp()).removeValue();
 
                         database.execSQL("INSERT INTO  '"+sortUid+"' (message,receiver, sender,msgTimeStamp) " +
-                                "VALUES ('"+plainText+"','"+receiverEmail+"','"+ mAuth.getCurrentUser().getEmail()+"','"+message.getMsgTimeStamp()+"')");
+                                "VALUES ('"+plainText+"','"+mAuth.getCurrentUser().getEmail()+"','"+ receiverEmail+"','"+message.getMsgTimeStamp()+"')");
+
+                        selectAllMessagesFromDb(messageList,userList,sortUid);
+
+                        adapter.notifyDataSetChanged();
+
+
 
                     }
 
@@ -240,15 +258,9 @@ public class ChatActivity extends AppCompatActivity {
         });
 
 
-            userList.clear();
-            messageList.clear();
-            Cursor cursor=database.rawQuery("SELECT * FROM '" + sortUid + "'",null);
-            while (cursor.moveToNext()) {
-                messageList.add(cursor.getString(0));
-                userList.add(cursor.getString(1));
-                listView.setAdapter(adapter);
-            }
-            cursor.close();
+        selectAllMessagesFromDb(messageList,userList,sortUid);
+
+        listView.setAdapter(adapter);
             
 
 
@@ -287,6 +299,11 @@ public class ChatActivity extends AppCompatActivity {
 
         FirebaseDatabase.getInstance().getReference("Messages").child(sortedUid).child(timestamp).setValue(message);
 
+        selectAllMessagesFromDb(messageList,userList,sortedUid);
+
+        adapter.notifyDataSetChanged();
+
+
     }
 
     @RequiresApi(api=Build.VERSION_CODES.N)
@@ -297,6 +314,18 @@ public class ChatActivity extends AppCompatActivity {
                 .collect(StringBuilder::new,StringBuilder::appendCodePoint,StringBuilder::append)
                 .toString();
         return sorted;
+    }
+
+    public void selectAllMessagesFromDb(List messageList,List userList,String sortUid){
+        userList.clear();
+        messageList.clear();
+        Cursor cursor=database.rawQuery("SELECT * FROM '" + sortUid + "'",null);
+        while (cursor.moveToNext()) {
+            messageList.add(cursor.getString(0));
+            userList .add(cursor.getString(1));
+        }
+        cursor.close();
+        adapter.notifyDataSetChanged();
     }
 
 
