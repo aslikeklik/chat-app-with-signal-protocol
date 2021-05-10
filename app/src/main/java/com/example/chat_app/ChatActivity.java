@@ -214,12 +214,12 @@ public class ChatActivity extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Message message=dataSnapshot.getValue(Message.class);
 
-                    String plainText=message.getMessage(); //Şifreli şu anda decryption etmemiz gerek.
+                    String cipherText=message.getMessage(); //Şifreli şu anda decryption etmemiz gerek.
 
-                    if (message.getReceiver().equals(mAuth.getCurrentUser().getEmail())&& !message.getDecrypted() && !previousCipherText.contains(plainText)) {
-                        byte[] ds=Base64.getDecoder().decode(plainText);
+                    if (message.getReceiver().equals(mAuth.getCurrentUser().getEmail())&& !message.getDecrypted() && !previousCipherText.contains(cipherText)) {
+                        byte[] ds=Base64.getDecoder().decode(cipherText);
                         PreKeySignalMessage toBobMessageDecrypt = new PreKeySignalMessage(ds);
-                        previousCipherText.add(plainText);
+                        previousCipherText.add(cipherText);
 
                         signalProtocolStore.storePreKey(alicePreKeyBundle.getPreKeyId(),preKeyRecord);
                         signalProtocolStore.storeSignedPreKey(alicePreKeyBundle.getSignedPreKeyId(),signedPreKeyRecord);
@@ -228,7 +228,7 @@ public class ChatActivity extends AppCompatActivity {
 
                         aliceToBobSession=new Session(signalProtocolStore,bobPreKeyBundle,signalProtocolAddress);
 
-                        plainText=aliceToBobSession.decrypt(toBobMessageDecrypt);
+                        String plainText=aliceToBobSession.decrypt(toBobMessageDecrypt);
                         message.setMessage(plainText);
                         message.setDecrypted(true);
 
@@ -242,8 +242,6 @@ public class ChatActivity extends AppCompatActivity {
                         selectAllMessagesFromDb(messageList,userList,sortUid);
 
                         adapter.notifyDataSetChanged();
-
-
 
                     }
 

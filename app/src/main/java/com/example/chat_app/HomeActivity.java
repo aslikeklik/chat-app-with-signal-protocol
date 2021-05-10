@@ -56,7 +56,7 @@ public class HomeActivity extends AppCompatActivity {
         ArrayList<String> userNameList=new ArrayList<>();
 
         adapter=new CustomAdapter(HomeActivity.this,userNameList,subjectLists);
-        // adapter = new ArrayAdapter<String>(HomeActivity.this, R.layout.item_chat_list, R.id.userName, subjectLists);
+        adapter.notifyDataSetChanged();
         listView.setAdapter(adapter);
         dbRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -64,10 +64,10 @@ public class HomeActivity extends AppCompatActivity {
                 User user=snapshot.getValue(User.class);
                 String name=user.getName();
                 String surname=user.getSurname();
-                userNameList.add(name+" "+surname);
                 String value=user.getEmail();
                 if(!value.equals(fAuth.getCurrentUser().getEmail().toString())) {
                     subjectLists.add(value);
+                    userNameList.add(name+" "+surname);
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -141,7 +141,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-
+        adapter.notifyDataSetChanged();
     }
 
      @Override

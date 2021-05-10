@@ -23,4 +23,5 @@ public class User {
     String name;
     String surname;
     PreKeyBundleMaker preKeyBundleMaker;
+    Boolean online;
 }
