@@ -316,13 +316,25 @@ public class ChatActivity extends AppCompatActivity {
         userList.clear();
         messageList.clear();
         messageTimeList.clear();
+
         Cursor cursor=database.rawQuery("SELECT * FROM '" + sortUid + "'",null);
         while (cursor.moveToNext()) {
-            messageList.add(cursor.getString(0));
-            userList .add(cursor.getString(1));
-        //    String msgTimeStamp=cursor.getString(2);
-         //   int day = (int) TimeUnit.SECONDS.toHours(Integer.valueOf(msgTimeStamp));
-            messageTimeList.add(cursor.getString(3));
+            if (messageTimeList.size()==0){
+                messageList.add(cursor.getString(0));
+                userList.add(cursor.getString(1));
+                //    String msgTimeStamp=cursor.getString(2);
+                //   int day = (int) TimeUnit.SECONDS.toHours(Integer.valueOf(msgTimeStamp));
+                messageTimeList.add(cursor.getString(3));
+            }
+            else {
+                if( !cursor.getString(3).equals(messageTimeList.get(messageTimeList.size()-1))){
+                    messageList.add(cursor.getString(0));
+                    userList.add(cursor.getString(1));
+                    //    String msgTimeStamp=cursor.getString(2);
+                    //   int day = (int) TimeUnit.SECONDS.toHours(Integer.valueOf(msgTimeStamp));
+                    messageTimeList.add(cursor.getString(3));
+                }
+            }
         }
         cursor.close();
         adapter.notifyDataSetChanged();
