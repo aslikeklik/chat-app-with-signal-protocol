@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -20,11 +18,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
+import com.example.chat_app.adapters.ChatAdapter;
 import com.example.chat_app.model.KeyPairsMaker;
 import com.example.chat_app.model.Message;
 import com.example.chat_app.model.PreKeyBundleMaker;
 import com.example.chat_app.model.StoreMaker;
-import com.example.chat_app.rsa.Entity;
 import com.example.chat_app.rsa.Session;
 import com.example.chat_app.util.ByteConverter;
 import com.example.chat_app.util.InMemorySignalProtocolStoreCreatorUtil;
@@ -33,7 +31,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -43,7 +40,6 @@ import org.whispersystems.libsignal.ecc.Curve;
 import org.whispersystems.libsignal.ecc.ECKeyPair;
 import org.whispersystems.libsignal.ecc.ECPrivateKey;
 import org.whispersystems.libsignal.protocol.PreKeySignalMessage;
-import org.whispersystems.libsignal.protocol.SignalMessage;
 import org.whispersystems.libsignal.state.PreKeyBundle;
 import org.whispersystems.libsignal.state.PreKeyRecord;
 import org.whispersystems.libsignal.state.SignalProtocolStore;
@@ -55,17 +51,15 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 
 import lombok.SneakyThrows;
 
 import static com.example.chat_app.rsa.RSAUtils.decrypt;
-import static com.example.chat_app.rsa.RSAUtils.encrypt;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -75,6 +69,7 @@ public class ChatActivity extends AppCompatActivity {
     private ListView listView;
     private ArrayList<String> messageList=new ArrayList<>();
     private ArrayList<String> userList=new ArrayList<>();
+    private ArrayList<String> messageTimeList=new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private Session aliceToBobSession;
     private PreKeyBundle bobPreKeyBundle,alicePreKeyBundle;
@@ -184,6 +179,7 @@ public class ChatActivity extends AppCompatActivity {
 
             String sortUid=sortUid(receiverUid,senderUid);
 
+        /*
             adapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,messageList) {
                 public View getView(int position,View convertView,ViewGroup parent) {
                     // Cast the current view as a TextView
@@ -199,7 +195,9 @@ public class ChatActivity extends AppCompatActivity {
                     return tv;
                 }
             };
+         */
 
+            adapter=new ChatAdapter(ChatActivity.this,messageList,messageTimeList,userList);
 
 
         ArrayList<String> previousCipherText=new ArrayList<>();
@@ -317,10 +315,14 @@ public class ChatActivity extends AppCompatActivity {
     public void selectAllMessagesFromDb(List messageList,List userList,String sortUid){
         userList.clear();
         messageList.clear();
+        messageTimeList.clear();
         Cursor cursor=database.rawQuery("SELECT * FROM '" + sortUid + "'",null);
         while (cursor.moveToNext()) {
             messageList.add(cursor.getString(0));
             userList .add(cursor.getString(1));
+        //    String msgTimeStamp=cursor.getString(2);
+         //   int day = (int) TimeUnit.SECONDS.toHours(Integer.valueOf(msgTimeStamp));
+            messageTimeList.add(cursor.getString(3));
         }
         cursor.close();
         adapter.notifyDataSetChanged();
