@@ -37,6 +37,7 @@ public class HomeActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
 
     String receiverUid;
+    //sdjkhfg
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
